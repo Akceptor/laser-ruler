@@ -10,10 +10,11 @@ constexpr int kRangeRx = 4;
 constexpr int kRangeTx = 5;
 constexpr int kBoot = 28;
 
-// Default: SW-SHOT wired to GND per the supplied manual's test procedure.
-// Remove that jumper BEFORE selecting a GPIO here. Verify actual polarity first.
+// Default: SW-SHOT tied to sensor VCC (factory confirmation supplied by owner).
+// Remove that jumper BEFORE selecting a GPIO here. Verify enable voltage levels
+// and use an interface circuit if needed; never connect a 5 V rail to an ESP GPIO.
 constexpr int kEnablePin = -1;
-constexpr bool kEnableActiveHigh = false;
+constexpr bool kEnableActiveHigh = true;
 
 constexpr uint8_t kDisplayWidth = 128;
 constexpr uint8_t kDisplayHeight = 64; // Change to 32 for a 128x32 OLED.

@@ -10,14 +10,16 @@ Arduino, and a pinned pioarduino platform with ESP32-C5 support.
    `include/ruler_core.h`; run the host tests with a C++ compiler and PlatformIO.
 3. Add editable board/display configuration in `include/config.h`, and the Arduino
    UART/OLED integration in `src/main.cpp`. Use GPIO0/1 for I²C, GPIO4/5 for UART,
-   BOOT GPIO28, and no software enable pin by default (SW-SHOT grounded).
+   BOOT GPIO28, and no software enable pin by default (SW-SHOT tied to sensor VCC).
 4. Compile `pio run -e esp32c5`. Review command transitions, stale measurement
    handling, 32-bit clock rollover, OLED failure behavior, and RAM/flash use.
 5. Update README and wiring documentation with setup, configuration, upload,
    controls, tests, and hardware limitations. Commit and push after verification.
 
-No hardware flashing is part of this implementation. The board model and enable
-polarity remain hardware checks; the firmware must not assume HIGH enables this unit.
+No hardware flashing is part of this implementation. The board model remains a
+hardware check. The owner relayed factory confirmation that SW-SHOT must be tied
+HIGH to sensor VCC for UART continuous mode, superseding the manual's conflicting
+test procedure. Software enable control remains disabled by default.
 
 ## Verification completed
 

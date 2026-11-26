@@ -128,7 +128,11 @@ void setup() {
     rangeSerial.begin(115200, SERIAL_8N1, config::kRangeRx, config::kRangeTx);
     delay(250); // Sensor startup <=200 ms; no boot-time measurement request.
     Serial.println("Laser ruler: tap BOOT to measure; hold 800 ms to toggle live mode");
-    Serial.println("Default enable wiring: SW-SHOT to GND; GPIO6 is not driven");
+    if (config::kEnablePin < 0)
+        Serial.println("Enable wiring: SW-SHOT tied to sensor VCC; no enable GPIO driven");
+    else
+        Serial.printf("Enable GPIO %d: active %s\n", config::kEnablePin,
+                      config::kEnableActiveHigh ? "HIGH" : "LOW");
     initDisplay();
     render();
 }

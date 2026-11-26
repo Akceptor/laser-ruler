@@ -41,11 +41,13 @@ Edit [`include/config.h`](include/config.h) to match your hardware:
 | BOOT | GPIO28, active LOW |
 | OLED size | 128×64; set height to 32 for 128×32 |
 | OLED address | Auto-detect 0x3C, then 0x3D |
-| Software enable GPIO | Disabled (`-1`); SW-SHOT wired to GND |
+| Software enable GPIO | Disabled (`-1`); SW-SHOT tied to sensor VCC (HIGH) |
 
-Do not select a software enable GPIO while SW-SHOT is directly grounded. Remove
-that jumper first and confirm actual polarity; see the manual conflict in the
-wiring guide. The unused GPIO6 is not driven by default.
+The owner relayed factory confirmation for the LR1200E2: UART continuous mode
+requires SW-SHOT HIGH, tied to VCC. This supersedes the contradictory grounding
+instruction in the manual's test procedure. No enable GPIO is driven by default.
+Before using optional GPIO control, remove the VCC jumper and verify the enable
+input's voltage requirements; the ESP32 GPIO must not be connected to a 5 V rail.
 
 From a terminal with PlatformIO installed:
 
