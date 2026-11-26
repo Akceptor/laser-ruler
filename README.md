@@ -43,6 +43,9 @@ Edit [`include/config.h`](include/config.h) to match your hardware:
 | OLED address | Auto-detect 0x3C, then 0x3D |
 | Software enable GPIO | Disabled (`-1`); SW-SHOT tied to sensor VCC (HIGH) |
 
+<img width="704" height="231" alt="image" src="https://github.com/user-attachments/assets/326474e5-0283-4406-bcc2-81a2621c44d4" />
+
+
 The owner relayed factory confirmation for the LR1200E2: UART continuous mode
 requires SW-SHOT HIGH, tied to VCC. This supersedes the contradictory grounding
 instruction in the manual's test procedure. No enable GPIO is driven by default.
@@ -56,36 +59,5 @@ pio run -e esp32c5
 pio run -e esp32c5 -t upload --upload-port /path/to/serial-port
 pio device monitor --port /path/to/serial-port --baud 115200
 ```
-
-The project limits upload speed to 115200 baud. Choose the actual device port.
-Close other tools using it before uploading. Release BOOT during normal reset;
-hold BOOT while pressing RESET if manual bootloader
-entry is needed. USB CDC is enabled for serial output on the native USB connector.
-If using a board's separate USB-to-UART bridge for logs, remove the
-`ARDUINO_USB_CDC_ON_BOOT` build flag and rebuild. Serial logging does not wait for
-a connected terminal. If no OLED is found, measurement controls and serial output
-continue to work.
-
-## Tests
-
-The parser and button/controller logic run on the host without connected hardware:
-
-```sh
-pio test -e native
-```
-
-For a compiler-only run with memory and undefined-behavior checks:
-
-```sh
-c++ -std=c++11 -Wall -Wextra -Werror -fsanitize=address,undefined \
-    -Iinclude test/test_core/test_main.cpp -o /tmp/laser-ruler-tests
-/tmp/laser-ruler-tests
-```
-
-## Status
-
-Firmware is implemented; the assembled hardware has not been tested or flashed.
-The exact ESP32-C5-H4 board manufacturer and revision have not been identified.
-GPIO assignments refer to ESP32-C5 signals, not physical header positions.
 
 The LR1200E2 is a long-distance sensor: its published range is 4–1,200 m, with ±1 m accuracy at 6–500 m under the manufacturer's target conditions. It is not a centimetre-precision ruler. Its 905 nm beam provides no visible aiming dot. See the [manufacturer's specifications](https://erdilrf.com/models/lr1200e2/).
