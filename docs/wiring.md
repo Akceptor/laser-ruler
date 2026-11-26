@@ -21,7 +21,7 @@ Disconnect power while wiring. All modules share GND.
 | LR1200E2 pin 3, reserved | Unconnected | Do not use |
 | LR1200E2 pin 4, TXD | GPIO4, UART RX | Direct connection; owner confirmed 3.3 V logic |
 | LR1200E2 pin 5, RXD | GPIO5, UART TX | Direct connection; owner confirmed 3.3 V logic |
-| LR1200E2 pin 6, SW-SHOT | Pending module-specific confirmation | See enable section; do not connect blindly |
+| LR1200E2 pin 6, SW-SHOT | GPIO6 | Active-high enable: HIGH = enabled, LOW = disabled |
 | Built-in BOOT | Already on board | Reference DevKitC-1: GPIO28, pressed LOW; verify your board |
 
 TX and RX cross: rangefinder TX → ESP RX, ESP TX → rangefinder RX. Use a hardware UART at **115200 baud, 8N1**, explicitly assigning RX=4 and TX=5. These are planned firmware settings, not instructions to use the board's default UART pins.
@@ -39,7 +39,7 @@ regulated 5 V ------------------ 2 VCC
 GPIO4 RX <---------------------- 4 TXD (3.3 V logic)
 GPIO5 TX ----------------------> 5 RXD (3.3 V logic)
                                  3 reserved: leave open
-                                 6 SW-SHOT: confirm before operation
+GPIO6 -------------------------- 6 SW-SHOT (HIGH = enabled)
 ```
 
 The [LR1200E2 integration documentation](https://erdilrf.com/docs/models/lr1200e2/) supplies the pin numbering. Confirm connector orientation against the drawing in the [module manual, section 5](https://erdilrf.com/datasheets/ERDI-LR1200E2-datasheet.pdf); do not infer pin 1 from wire colours or this logical diagram.
@@ -50,13 +50,13 @@ Use USB to power the ESP board. Power the rangefinder from a regulated 5 V rail 
 
 Do not power the rangefinder from a GPIO. Keep power leads short; a suggested starting point is 100 nF ceramic plus 100 µF bulk capacitance across sensor VCC/GND near the connector, observing polarity.
 
-The owner confirmed on 2026-11-26 that this rangefinder uses **3.3 V logic**. Connect its UART directly to the ESP32-C5 as shown; no level translator is needed for this unit. This is owner-supplied information, not a measurement made during this project. Supply voltage and logic voltage are separate: the proposed sensor supply remains regulated 5 V. This UART confirmation does not establish the SW-SHOT enable polarity or its allowed input voltage.
+The owner confirmed on 2026-11-26 that this rangefinder uses **3.3 V logic**. Connect its UART directly to the ESP32-C5 as shown; no level translator is needed for this unit. This is owner-supplied information, not a measurement made during this project. Supply voltage and logic voltage are separate: the proposed sensor supply remains regulated 5 V. Use a 3.3 V GPIO signal for SW-SHOT as well; do not tie it to the 5 V supply.
 
-## Rangefinder enable: unresolved for this unit
+## Rangefinder enable
 
-The manual describes SW-SHOT as active high but also mentions active-low compatibility. Confirm the supplied unit's enable polarity and allowed input voltage with its seller/manual before operating it. Do not tie pin 6 to 5 V, connect it to BOOT, or assume leaving it floating enables the sensor.
+The owner supplied the manual wording: **Function Enable (active high)**, with a note about compatibility with active-low control requirements. This design follows the explicit active-high definition: connect pin 6 to GPIO6; drive HIGH (3.3 V) to enable and LOW to disable. The note does not establish automatic polarity detection or mean that both levels enable the same unit; treat active-low operation as an alternative that needs separate confirmation if used.
 
-Once confirmed, use the specified fixed enable level or allocate GPIO6 through any required interface circuit. GPIO6 is a proposed spare; its use is conditional on board availability. Measurements will be requested over UART; SW-SHOT is not the user's measurement button.
+GPIO6 availability still depends on the exact board. Planned firmware will configure it as an output, enable the sensor, allow startup time, and request measurements over UART. SW-SHOT is an enable signal, not the user's measurement button; do not connect it to BOOT. An optional 10 kΩ pull-down from SW-SHOT to GND keeps enable LOW while the ESP pin is high impedance during reset. Check that it does not conflict with any existing pull-up on the supplied module.
 
 ## OLED checks
 
@@ -74,8 +74,8 @@ Planned firmware behavior: debounce presses, trigger a single measurement on sho
 
 1. Identify the board and verify GPIO assignments, BOOT, and power rails.
 2. Connect only the OLED; confirm supply, I²C address, and resolution.
-3. Confirm rangefinder connector orientation and SW-SHOT requirements; this unit's 3.3 V UART logic is owner-confirmed.
-4. Connect sensor power and the confirmed enable circuit; check voltage under load.
+3. Confirm rangefinder connector orientation; this unit's 3.3 V logic and documented active-high enable are recorded above.
+4. Connect sensor power and SW-SHOT to GPIO6; check voltage under load with enable HIGH.
 5. With power off, connect the compatible UART interface, then power up.
 6. Once firmware exists, test a stationary outdoor target beyond the minimum range. Verify single measurement, continuous mode, and explicit timeout/no-return handling. Never present an old result as a fresh successful measurement.
 
