@@ -19,8 +19,8 @@ Disconnect power while wiring. All modules share GND.
 | LR1200E2 pin 1, GND | GND | Common ground |
 | LR1200E2 pin 2, VCC | Regulated 5 V supply | See power section |
 | LR1200E2 pin 3, reserved | Unconnected | Do not use |
-| LR1200E2 pin 4, TXD | GPIO4, UART RX | Only after UART voltage check below |
-| LR1200E2 pin 5, RXD | GPIO5, UART TX | Only after input-level compatibility is confirmed |
+| LR1200E2 pin 4, TXD | GPIO4, UART RX | Direct connection; owner confirmed 3.3 V logic |
+| LR1200E2 pin 5, RXD | GPIO5, UART TX | Direct connection; owner confirmed 3.3 V logic |
 | LR1200E2 pin 6, SW-SHOT | Pending module-specific confirmation | See enable section; do not connect blindly |
 | Built-in BOOT | Already on board | Reference DevKitC-1: GPIO28, pressed LOW; verify your board |
 
@@ -36,8 +36,8 @@ GPIO1 -------------------------- SCL
 ESP32-C5                         LR1200E2
 GND ---------------------------- 1 GND
 regulated 5 V ------------------ 2 VCC
-GPIO4 RX <--- [level check] ----- 4 TXD
-GPIO5 TX ---- [level check] ----> 5 RXD
+GPIO4 RX <---------------------- 4 TXD (3.3 V logic)
+GPIO5 TX ----------------------> 5 RXD (3.3 V logic)
                                  3 reserved: leave open
                                  6 SW-SHOT: confirm before operation
 ```
@@ -50,7 +50,7 @@ Use USB to power the ESP board. Power the rangefinder from a regulated 5 V rail 
 
 Do not power the rangefinder from a GPIO. Keep power leads short; a suggested starting point is 100 nF ceramic plus 100 µF bulk capacitance across sensor VCC/GND near the connector, observing polarity.
 
-**Supply voltage is not UART voltage.** ERDI does not specify UART logic voltage separately in the integration guide. Confirm the sensor TX high level and RX input requirements before connecting either signal. Direct wiring is conditional on 3.3 V logic compatibility. If the sensor uses 5 V TX logic, use a suitable UART level translator before GPIO4; select the reverse direction according to the sensor's RX specification. A series resistor alone is not a level converter.
+The owner confirmed on 2026-11-26 that this rangefinder uses **3.3 V logic**. Connect its UART directly to the ESP32-C5 as shown; no level translator is needed for this unit. This is owner-supplied information, not a measurement made during this project. Supply voltage and logic voltage are separate: the proposed sensor supply remains regulated 5 V. This UART confirmation does not establish the SW-SHOT enable polarity or its allowed input voltage.
 
 ## Rangefinder enable: unresolved for this unit
 
@@ -74,7 +74,7 @@ Planned firmware behavior: debounce presses, trigger a single measurement on sho
 
 1. Identify the board and verify GPIO assignments, BOOT, and power rails.
 2. Connect only the OLED; confirm supply, I²C address, and resolution.
-3. Confirm rangefinder connector orientation, UART levels, and SW-SHOT requirements.
+3. Confirm rangefinder connector orientation and SW-SHOT requirements; this unit's 3.3 V UART logic is owner-confirmed.
 4. Connect sensor power and the confirmed enable circuit; check voltage under load.
 5. With power off, connect the compatible UART interface, then power up.
 6. Once firmware exists, test a stationary outdoor target beyond the minimum range. Verify single measurement, continuous mode, and explicit timeout/no-return handling. Never present an old result as a fresh successful measurement.
