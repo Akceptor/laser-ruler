@@ -2,7 +2,7 @@
 
 Outdoor handheld distance meter using an LR1200E2 rangefinder, an ESP32-C5-H4 development board, and an SSD1306 I²C OLED. Use the existing **BOOT button**; no external measurement button is needed.
 
-"The rangefinder here is the LR1200E2 from ERDILRF. They make 59 laser rangefinder modules, from a tiny 9-metre sensor up to 1535 nm eye-safe modules that reach several kilometres, for civil drones, robots, surveying gear, handheld instruments and industrial sensing. Prices are listed on their site erdilrf.com, and the Python and ROS 2 drivers are free."
+"The rangefinder here is the LR1200E2 from ERDILRF. They make 59 laser rangefinder modules, from a tiny 9-metre sensor up to 1535 nm eye-safe modules that reach several kilometres, for civil drones, robots, surveying gear, handheld instruments and industrial sensing. Prices are listed on [their site](erdilrf.com), and the Python and ROS 2 drivers are free."
 
 ## Wiring
 
