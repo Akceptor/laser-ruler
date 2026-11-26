@@ -78,7 +78,9 @@ void sendCommand(uint8_t function) {
     uint8_t bytes[8];
     ruler::makeCommand(function, bytes);
     rangeSerial.write(bytes, sizeof(bytes));
-    Serial.printf("TX function 0x%02X\n", function);
+    Serial.printf("TX function 0x%02X:", function);
+    for (uint8_t b : bytes) Serial.printf(" %02X", b);
+    Serial.println();
 }
 
 void render() {
@@ -139,14 +141,24 @@ void setup() {
 
 void loop() {
     // Service UART before input; drain at most 256 bytes to keep input responsive.
+    bool sawRx = false;
     for (unsigned i = 0; i < 256 && rangeSerial.available(); ++i) {
+        const uint8_t byte = static_cast<uint8_t>(rangeSerial.read());
+        if (!sawRx) {
+            Serial.print("RX:");
+            sawRx = true;
+        }
+        Serial.printf(" %02X", byte);
         ruler::Packet packet{};
-        if (parser.feed(static_cast<uint8_t>(rangeSerial.read()), millis(), packet)) {
+        if (parser.feed(byte, millis(), packet)) {
+            Serial.println();
+            sawRx = false;
             if (packet.function == 0x80)
                 Serial.printf("Sensor self-test status: %u\n", packet.status);
             controller.receive(packet, millis());
         }
     }
+    if (sawRx) Serial.println();
     const uint32_t now = millis();
     controller.tick(now);
     const auto gesture = button.update(digitalRead(config::kBoot) == LOW, now);
