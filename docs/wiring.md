@@ -24,7 +24,7 @@ Disconnect power while wiring. All modules share GND.
 | LR1200E2 pin 6, SW-SHOT | GND for initial test; GPIO6 for later control | Supplied manual's test procedure requires LOW; polarity conflict below |
 | Built-in BOOT | Already on board | Reference DevKitC-1: GPIO28, pressed LOW; verify your board |
 
-TX and RX cross: rangefinder TX → ESP RX, ESP TX → rangefinder RX. Use a hardware UART at **115200 baud, 8N1**, explicitly assigning RX=4 and TX=5. These are planned firmware settings, not instructions to use the board's default UART pins.
+TX and RX cross: rangefinder TX → ESP RX, ESP TX → rangefinder RX. The firmware uses a hardware UART at **115200 baud, 8N1**, explicitly assigning RX=4 and TX=5. See `include/config.h` to change these assignments; they are not the board's default UART pins.
 
 ```text
 ESP32-C5                         SSD1306 I²C breakout
@@ -61,7 +61,7 @@ The supplied manual is internally inconsistent:
 
 For initial bring-up, follow the concrete operating procedure: **connect pin 6 to GND** and request measurements over UART. This replaces the earlier HIGH-to-enable recommendation. The manual does not explain how the two polarity statements relate, so actual enable/disable behavior still needs confirmation on the supplied unit or from the seller. Do not infer automatic polarity detection.
 
-GPIO6 remains reserved for optional software control once polarity is verified; its availability depends on the exact board. Before connecting GPIO6, remove the direct GND jumper. Never drive a GPIO HIGH into that jumper. Planned firmware should make enable polarity configurable and wait at least 200 ms after enabling before sending commands. Do not describe LOW as disabled until hardware testing establishes that behavior. SW-SHOT is an enable signal, not the user's measurement button; do not connect it to BOOT.
+GPIO6 remains reserved for optional software control once polarity is verified; its availability depends on the exact board. Before connecting GPIO6, remove the direct GND jumper. Never drive a GPIO HIGH into that jumper. Firmware defaults to no enable GPIO (`kEnablePin = -1`); optional polarity is configurable with `kEnableActiveHigh` in `include/config.h`. Startup allows 250 ms before operation. Do not describe LOW as disabled until hardware testing establishes that behavior. SW-SHOT is an enable signal, not the user's measurement button; do not connect it to BOOT.
 
 ## OLED checks
 
@@ -73,7 +73,7 @@ Scan for the actual I²C address during firmware bring-up; 0x3C and 0x3D are com
 
 No extra button wiring is required. Verify the BOOT GPIO against your board schematic; do not assume the GPIO0 mapping used on older ESP32 boards. On the reference DevKitC-1 it is GPIO28, active low.
 
-Planned firmware behavior: debounce presses, trigger a single measurement on short release, and toggle continuous mode once after a long press. A long press must not also issue a short-press measurement. BOOT must be released during power-up/reset to start the application normally; holding it while resetting requests the bootloader. Keep external peripherals off this pin.
+Firmware debounces presses, triggers a single measurement on short release, and toggles continuous mode once after an 800 ms hold. A long press does not also issue a short-press measurement. BOOT must be released during power-up/reset to start the application normally; holding it while resetting requests the bootloader. Keep external peripherals off this pin.
 
 ## Bring-up order
 
@@ -82,6 +82,6 @@ Planned firmware behavior: debounce presses, trigger a single measurement on sho
 3. Confirm rangefinder connector orientation against PDF page 4; this unit's 3.3 V UART logic is owner-confirmed.
 4. Connect sensor power and SW-SHOT to GND per PDF page 6; check supply voltage under load. Leave GPIO6 disconnected during this initial test.
 5. With power off, connect the compatible UART interface, then power up.
-6. Once firmware exists, test a stationary outdoor target beyond the minimum range. Verify single measurement, continuous mode, and explicit timeout/no-return handling. Never present an old result as a fresh successful measurement.
+6. Upload the firmware using the README instructions, then test a stationary outdoor target beyond the minimum range. Verify single measurement, continuous mode, and explicit timeout/no-return handling. Never present an old result as a fresh successful measurement.
 
 This guide has been checked against the linked documentation, but the assembled hardware has not been tested.
