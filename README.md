@@ -57,8 +57,9 @@ pio run -e esp32c5 -t upload --upload-port /path/to/serial-port
 pio device monitor --port /path/to/serial-port --baud 115200
 ```
 
-Choose the actual device port. Close other tools using it before uploading. Release
-BOOT during normal reset; hold BOOT while pressing RESET if manual bootloader
+The project limits upload speed to 115200 baud. Choose the actual device port.
+Close other tools using it before uploading. Release BOOT during normal reset;
+hold BOOT while pressing RESET if manual bootloader
 entry is needed. USB CDC is enabled for serial output on the native USB connector.
 If using a board's separate USB-to-UART bridge for logs, remove the
 `ARDUINO_USB_CDC_ON_BOOT` build flag and rebuild. Serial logging does not wait for
